@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Features\Pages\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Features\Account\LoggedOut.cshtml" />
+    <None Include="Features\Account\Login.cshtml" />
+    <None Include="Features\Account\Logout.cshtml" />
+    <None Include="Features\Consent\Index.cshtml" />
+    <None Include="Features\Device\Success.cshtml" />
+    <None Include="Features\Device\UserCodeCapture.cshtml" />
+    <None Include="Features\Device\UserCodeConfirmation.cshtml" />
+    <None Include="Features\Diagnostics\Index.cshtml" />
+    <None Include="Features\Grants\Index.cshtml" />
+    <None Include="Features\Home\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="IdentityServer4" Version="3.1.0" />
+  </ItemGroup>
+
+</Project>

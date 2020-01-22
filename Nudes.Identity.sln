@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nudes.Identity", "src\Nudes.Identity\Nudes.Identity.csproj", "{E5A04F91-E9A6-4F79-B449-218B44553C47}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSample", "samples\WebSample\WebSample.csproj", "{B86C6FC4-D746-4B99-AAD8-4D8865C561E6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E5A04F91-E9A6-4F79-B449-218B44553C47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5A04F91-E9A6-4F79-B449-218B44553C47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5A04F91-E9A6-4F79-B449-218B44553C47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5A04F91-E9A6-4F79-B449-218B44553C47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B86C6FC4-D746-4B99-AAD8-4D8865C561E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B86C6FC4-D746-4B99-AAD8-4D8865C561E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B86C6FC4-D746-4B99-AAD8-4D8865C561E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B86C6FC4-D746-4B99-AAD8-4D8865C561E6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {347359CF-28DA-4771-A980-360D82204185}
+	EndGlobalSection
+EndGlobal
