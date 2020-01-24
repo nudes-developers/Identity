@@ -8,36 +8,37 @@ using IdentityModel;
 using IdentityServer4.Events;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
-using IdentityServer4.Test;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Nudes.Identity.Features.Users;
+using Nudes.Identity.Options;
 
 namespace Nudes.Identity
 {
-    [SecurityHeaders]
     [AllowAnonymous]
     public class ExternalController : Controller
     {
-        private readonly TestUserStore _users;
-        private readonly IIdentityServerInteractionService _interaction;
-        private readonly IClientStore _clientStore;
-        private readonly IEventService _events;
+        private readonly IIdentityServerInteractionService interaction;
+        private readonly IClientStore clientStore;
+        private readonly IEventService events;
+        private readonly IMediator mediator;
+        private readonly NudesIdentityOptions options;
 
         public ExternalController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IEventService events,
-            TestUserStore users = null)
+            IMediator mediator,
+            NudesIdentityOptions options)
         {
-            // if the TestUserStore is not in DI, then we'll just use the global users collection
-            // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
-            _users = users ?? new TestUserStore(TestUsers.Users);
-
-            _interaction = interaction;
-            _clientStore = clientStore;
-            _events = events;
+            this.interaction = interaction;
+            this.clientStore = clientStore;
+            this.events = events;
+            this.mediator = mediator;
+            this.options = options;
         }
 
         /// <summary>
@@ -49,17 +50,11 @@ namespace Nudes.Identity
             if (string.IsNullOrEmpty(returnUrl)) returnUrl = "~/";
 
             // validate returnUrl - either it is a valid OIDC URL or back to a local page
-            if (Url.IsLocalUrl(returnUrl) == false && _interaction.IsValidReturnUrl(returnUrl) == false)
-            {
-                // user might have clicked on a malicious link - should be logged
-                throw new Exception("invalid return URL");
-            }
+            if (Url.IsLocalUrl(returnUrl) == false && interaction.IsValidReturnUrl(returnUrl) == false)
+                throw new Exception("invalid return URL"); // user might have clicked on a malicious link - should be logged
 
             if (AccountOptions.WindowsAuthenticationSchemeName == provider)
-            {
-                // windows authentication needs special handling
                 return await ProcessWindowsLoginAsync(returnUrl);
-            }
             else
             {
                 // start challenge and roundtrip the return URL and scheme 
@@ -91,13 +86,13 @@ namespace Nudes.Identity
             }
 
             // lookup our user and external provider info
-            var (user, provider, providerUserId, claims) = FindUserFromExternalProvider(result);
+            var (user, provider, providerUserId, claims) = await FindUserFromExternalProvider(result);
             if (user == null)
             {
                 // this might be where you might initiate a custom workflow for user registration
                 // in this sample we don't show how that would be done, as our sample implementation
                 // simply auto-provisions new external user
-                user = AutoProvisionUser(provider, providerUserId, claims);
+                user = await AutoProvisionUser(provider, providerUserId, claims);
             }
 
             // this allows us to collect any additonal claims or properties
@@ -110,7 +105,7 @@ namespace Nudes.Identity
             ProcessLoginCallbackForSaml2p(result, additionalLocalClaims, localSignInProps);
 
             // issue authentication cookie for user
-            await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.SubjectId, user.Username));
+            await events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.SubjectId, user.Username));
             await HttpContext.SignInAsync(user.SubjectId, user.Username, provider, localSignInProps, additionalLocalClaims.ToArray());
 
             // delete temporary cookie used during external authentication
@@ -120,10 +115,10 @@ namespace Nudes.Identity
             var returnUrl = result.Properties.Items["returnUrl"] ?? "~/";
 
             // check if external login is in the context of an OIDC request
-            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            var context = await interaction.GetAuthorizationContextAsync(returnUrl);
             if (context != null)
             {
-                if (await _clientStore.IsPkceClientAsync(context.ClientId))
+                if (await clientStore.IsPkceClientAsync(context.ClientId))
                 {
                     // if the client is PKCE then we assume it's native, so this change in how to
                     // return the response is for better UX for the end user.
@@ -158,7 +153,7 @@ namespace Nudes.Identity
                 id.AddClaim(new Claim(JwtClaimTypes.Name, wp.Identity.Name));
 
                 // add the groups as claims -- be careful if the number of groups is too large
-                if (AccountOptions.IncludeWindowsGroups)
+                if (options.Account.IncludeWindowsGroups)
                 {
                     var wi = wp.Identity as WindowsIdentity;
                     var groups = wi.Groups.Translate(typeof(NTAccount));
@@ -181,7 +176,7 @@ namespace Nudes.Identity
             }
         }
 
-        private (TestUser user, string provider, string providerUserId, IEnumerable<Claim> claims) FindUserFromExternalProvider(AuthenticateResult result)
+        private async Task<(UserResult user, string provider, string providerUserId, IEnumerable<Claim> claims)> FindUserFromExternalProvider(AuthenticateResult result)
         {
             var externalUser = result.Principal;
 
@@ -199,17 +194,15 @@ namespace Nudes.Identity
             var provider = result.Properties.Items["scheme"];
             var providerUserId = userIdClaim.Value;
 
+
             // find external user
-            var user = _users.FindByExternalProvider(provider, providerUserId);
+            var user = await mediator.Send(new ExternalProviderUserQuery(provider, providerUserId));
+            //var user = _users.FindByExternalProvider(provider, providerUserId);
 
             return (user, provider, providerUserId, claims);
         }
 
-        private TestUser AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims)
-        {
-            var user = _users.AutoProvisionUser(provider, providerUserId, claims.ToList());
-            return user;
-        }
+        private Task<UserResult> AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims) => mediator.Send(new AutoProvisionUserCommand(provider, providerUserId, claims));
 
         private void ProcessLoginCallbackForOidc(AuthenticateResult externalResult, List<Claim> localClaims, AuthenticationProperties localSignInProps)
         {
@@ -217,16 +210,12 @@ namespace Nudes.Identity
             // so we can use it for single sign-out
             var sid = externalResult.Principal.Claims.FirstOrDefault(x => x.Type == JwtClaimTypes.SessionId);
             if (sid != null)
-            {
                 localClaims.Add(new Claim(JwtClaimTypes.SessionId, sid.Value));
-            }
 
             // if the external provider issued an id_token, we'll keep it for signout
             var id_token = externalResult.Properties.GetTokenValue("id_token");
             if (id_token != null)
-            {
                 localSignInProps.StoreTokens(new[] { new AuthenticationToken { Name = "id_token", Value = id_token } });
-            }
         }
 
         private void ProcessLoginCallbackForWsFed(AuthenticateResult externalResult, List<Claim> localClaims, AuthenticationProperties localSignInProps)

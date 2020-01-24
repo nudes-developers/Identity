@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <PackageReference Include="IdentityServer4" Version="3.1.0" />
+    <PackageReference Include="MediatR" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

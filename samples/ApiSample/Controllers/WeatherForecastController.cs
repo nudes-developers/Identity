@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace WebSample.Controllers
+namespace ApiSample.Controllers
 {
-    [Authorize]
+    [Authorize] //Will require your default authentication schema in this case Bearer
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase

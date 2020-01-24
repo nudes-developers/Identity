@@ -1,5 +1,11 @@
 using System.Threading.Tasks;
+using IdentityServer4;
 using IdentityServer4.Stores;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Nudes.Identity.Features.Users;
+using Nudes.Identity.Options;
 
 namespace Nudes.Identity
 {
@@ -21,5 +27,30 @@ namespace Nudes.Identity
 
             return false;
         }
+
+        /// <summary>
+        /// Internal signin method that generates the cookie authentication for an UserResult in the NudesIdentity schema
+        /// </summary>
+        internal static Task SignInAsync(this HttpContext context, UserResult user, AuthenticationProperties properties)
+        {
+            var clock = context.RequestServices.GetRequiredService<ISystemClock>();
+
+            var identityUser = new IdentityServerUser(user.SubjectId)
+            {
+                DisplayName = user.Username,
+                AuthenticationTime = clock.UtcNow.UtcDateTime,
+            };
+
+            if (user.Claims != null)
+                identityUser.AdditionalClaims = user.Claims;
+
+            return context.SignInAsync(NudesIdentityOptions.NudesIdenitySchema, identityUser.CreatePrincipal(), properties);
+        }
+
+        /// <summary>
+        /// Internal signout method that signouts the user for the NudesIdentity schema
+        /// </summary>
+        public static Task SignOutFromIdentity(this HttpContext context) => context.SignOutAsync(NudesIdentityOptions.NudesIdenitySchema);
+
     }
 }

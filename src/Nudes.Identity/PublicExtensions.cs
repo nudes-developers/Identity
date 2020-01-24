@@ -1,19 +1,44 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using IdentityServer4.Configuration;
 using Microsoft.AspNetCore.Mvc.Razor;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
+using Nudes.Identity.Options;
 using System;
 
 namespace Nudes.Identity
 {
     public static class PublicExtensions
     {
+        /// <summary>
+        /// Adds all necessary services and includes the controllers of this assembly
+        /// Also configures RazorViewEngineOptions to include our views and
+        /// configures IdentityServerOptions to use our Cookie AuthenticationSchema
+        /// </summary>
         public static IMvcBuilder AddNudesIdentity(this IMvcBuilder builder)
         {
-            builder.Services.Configure<RazorViewEngineOptions>(o =>
+            ConfigureServices(builder.Services);
+
+            return builder.AddApplicationPart(typeof(PublicExtensions).Assembly);
+        }
+
+        /// <summary>
+        /// Adds all necessary services and includes the controllers of this assembly
+        /// Also configures RazorViewEngineOptions to include our views and
+        /// configures IdentityServerOptions to use our Cookie AuthenticationSchema
+        /// </summary>
+        /// <param name="options">Action to make changes on NudesIdentityOption</param>
+        public static IMvcBuilder AddNudesIdentity(this IMvcBuilder builder, Action<NudesIdentityOptions> options)
+        {
+            ConfigureServices(builder.Services);
+
+            builder.Services.Configure(options);
+
+            return builder.AddApplicationPart(typeof(PublicExtensions).Assembly);
+        }
+
+        private static void ConfigureServices(IServiceCollection services)
+        {
+            // Configure view location to search for razor views and pages
+            services.Configure<RazorViewEngineOptions>(o =>
             {
                 o.ViewLocationFormats.Add("/Features/{1}/{0}.cshtml");
                 o.PageViewLocationFormats.Add("/Features/{1}/{0}.cshtml");
@@ -21,37 +46,13 @@ namespace Nudes.Identity
                 o.ViewLocationFormats.Add("/Features/Shared/{0}.cshtml");
                 o.PageViewLocationFormats.Add("/Features/Shared/{0}.cshtml");
             });
-            //.ConfigureOptions<UIConfigureOptions>();
 
-            return builder.AddApplicationPart(typeof(PublicExtensions).Assembly);
+            // Configure IdentityServer to use our cookie authentication schema
+            services.Configure<IdentityServerOptions>(setup => setup.Authentication.CookieAuthenticationScheme = NudesIdentityOptions.NudesIdenitySchema);
 
+            // Add IdentityOptions and give possibility to configure
+            services.AddOptions<NudesIdentityOptions>();
         }
     }
 
-    public class UIConfigureOptions : IPostConfigureOptions<StaticFileOptions>
-    {
-        public UIConfigureOptions(IHostEnvironment env)
-        {
-            Env = env;
-        }
-
-        public IHostEnvironment Env { get; }
-
-        public void PostConfigure(string name, StaticFileOptions options)
-        {
-            name = name ?? throw new ArgumentNullException(nameof(name));
-            options = options ?? throw new ArgumentNullException(nameof(options));
-
-            options.ContentTypeProvider = options.ContentTypeProvider ?? new FileExtensionContentTypeProvider();
-            if (options.FileProvider == null && Env.ContentRootFileProvider == null)
-                throw new InvalidOperationException("Missing FileProvider.");
-
-            options.FileProvider = options.FileProvider ?? Env.ContentRootFileProvider;
-
-            var basePath = "wwwroot";
-
-            var filesProvider = new ManifestEmbeddedFileProvider(GetType().Assembly, basePath);
-            options.FileProvider = new CompositeFileProvider(options.FileProvider, filesProvider);
-        }
-    }
 }

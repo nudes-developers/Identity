@@ -1,17 +1,16 @@
 using IdentityServer4;
 using IdentityServer4.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Razor;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nudes.Identity;
+using Nudes.Identity.Options;
 using System.Collections.Generic;
 
-namespace WebSample
+namespace ApiSample
 {
     public class Startup
     {
@@ -53,12 +52,15 @@ namespace WebSample
                         {
                             IdentityServerConstants.StandardScopes.OpenId,
                             IdentityServerConstants.StandardScopes.Profile,
+                            "api1"
                         }
-                    }
+                    },
                 })
                 .AddDeveloperSigningCredential();
 
-            services.AddAuthentication()
+            services
+                .AddAuthentication("Bearer")
+                .AddCookie(NudesIdentityOptions.NudesIdenitySchema)
                 .AddJwtBearer(op =>
                 {
                     op.Authority = "http://localhost:5000";
@@ -67,13 +69,28 @@ namespace WebSample
                 });
 
             services.AddControllersWithViews()
-                .AddNudesIdentity();
+                .AddNudesIdentity(options => options.Account.ShowLogoutPrompt = false);
+
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            services.AddMediatR(this.GetType().Assembly);
+
+            //services.Configure<NudesIdentityOptions>(d => d.ShowLogoutPrompt = false);
+
+            services.AddCors(s => s.AddPolicy("corsPolicy", d =>
+            {
+                d.WithOrigins("http://localhost:3000")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            }));
+
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -88,8 +105,12 @@ namespace WebSample
                 app.UseExceptionHandler("/Error");
             }
 
+            app.UseCors("corsPolicy");
+
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
+
+            //app.UseMiddleware<SecurityHeadersMiddleware>();
 
             app.UseIdentityServer();
 
