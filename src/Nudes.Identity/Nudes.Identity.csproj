@@ -21,7 +21,6 @@
     <None Include="Features\Device\Success.cshtml" />
     <None Include="Features\Device\UserCodeCapture.cshtml" />
     <None Include="Features\Device\UserCodeConfirmation.cshtml" />
-    <None Include="Features\Diagnostics\Index.cshtml" />
     <None Include="Features\Grants\Index.cshtml" />
     <None Include="Features\Home\Index.cshtml" />
   </ItemGroup>
