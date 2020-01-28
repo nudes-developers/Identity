@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/nudes-senaisp/Identity</PackageProjectUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <RepositoryUrl>https://github.com/nudes-senaisp/Identity</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,7 +19,15 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Nudes.Identity\Nudes.Identity.csproj" />
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\Nudes.Identity\Nudes.Identity.csproj" />
   </ItemGroup>
 
 </Project>
