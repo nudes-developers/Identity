@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Nudes.Identity.AspnetIdentity\Nudes.Identity.AspnetCoreIdentity.csproj" />
     <ProjectReference Include="..\..\src\Nudes.Identity\Nudes.Identity.csproj" />
   </ItemGroup>
 

@@ -1,3 +1,4 @@
+using ApiSample.Models;
 using IdentityServer4;
 using IdentityServer4.Models;
 using MediatR;
@@ -72,6 +73,11 @@ namespace ApiSample
 
             services.AddControllersWithViews()
                 .AddNudesIdentity<NudesIdentityUserStorage>();
+
+            /* or using this if you are using Aspnetcore Identity (requires de Nudes.Identity.AspnetCoreIdentity package
+               services.AddControllersWithViews()
+                .AddNudesAspnetCoreIdentity<User>();
+            */
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
