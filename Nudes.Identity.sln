@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nudes.Identity", "src\Nudes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiSample", "samples\ApiSample\ApiSample.csproj", "{B86C6FC4-D746-4B99-AAD8-4D8865C561E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nudes.Identity.AspnetCoreIdentity", "Nudes.Identity.AspnetIdentity\Nudes.Identity.AspnetCoreIdentity.csproj", "{ED136DE5-8786-41DD-B5B1-B709524EE82A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nudes.Identity.AspnetCoreIdentity", "src\Nudes.Identity.AspnetIdentity\Nudes.Identity.AspnetCoreIdentity.csproj", "{ED136DE5-8786-41DD-B5B1-B709524EE82A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
