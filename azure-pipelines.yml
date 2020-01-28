@@ -22,6 +22,17 @@ steps:
     packageType: sdk
     version: $(sdkVersion)
 
+- task: CmdLine@2
+  displayName: 'Install DNT'
+  inputs:
+    script: 'dotnet tool install dnt -g'
+
+- task: CmdLine@2
+  displayName: 'Update project version patch'
+  inputs:
+    script: 'dnt bump-versions patch'
+    failOnStderr: true
+
 
 - task: DotNetCoreCLI@2
   displayName: 'Build Solution'
