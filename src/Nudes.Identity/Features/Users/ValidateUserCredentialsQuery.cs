@@ -1,12 +1,10 @@
-﻿using MediatR;
-using Nudes.Identity.Features.Users;
-
+﻿
 namespace Nudes.Identity.Features.Users
 {
     /// <summary>
     /// Queries for a valid user for the specified credentials
     /// </summary>
-    public class ValidateUserCredentialsQuery : IRequest<UserResult>
+    public class ValidateUserCredentialsQuery 
     {
         public ValidateUserCredentialsQuery() { /* as is */ }
 

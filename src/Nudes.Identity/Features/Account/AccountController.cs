@@ -4,7 +4,6 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
-using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +13,7 @@ using Nudes.Identity.Features.Users;
 using Nudes.Identity.Options;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Nudes.Identity
@@ -30,7 +30,6 @@ namespace Nudes.Identity
         private readonly IClientStore clientStore;
         private readonly IAuthenticationSchemeProvider schemeProvider;
         private readonly IEventService events;
-        private readonly IMediator mediator;
         private readonly NudesIdentityOptions options;
 
         public AccountController(
@@ -38,7 +37,6 @@ namespace Nudes.Identity
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
             IEventService events,
-            IMediator mediator,
             IOptions<NudesIdentityOptions> options
             )
         {
@@ -46,7 +44,6 @@ namespace Nudes.Identity
             this.clientStore = clientStore;
             this.schemeProvider = schemeProvider;
             this.events = events;
-            this.mediator = mediator;
             this.options = options.Value;
         }
 
@@ -109,7 +106,8 @@ namespace Nudes.Identity
             {
 
                 // validate username/password against in-memory store
-                var user = await mediator.Send(new ValidateUserCredentialsQuery(model.Username, model.Password));
+                
+                var user = await options.ValidateUserCredentials(new ValidateUserCredentialsQuery(model.Username, model.Password), CancellationToken.None);
                 if (user != null)
                 {
                     await events.RaiseAsync(new UserLoginSuccessEvent(user.Username, user.SubjectId, user.Username));

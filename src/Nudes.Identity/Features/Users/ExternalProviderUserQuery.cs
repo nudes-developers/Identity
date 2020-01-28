@@ -1,11 +1,10 @@
-﻿using MediatR;
-
+﻿
 namespace Nudes.Identity.Features.Users
 {
     /// <summary>
     /// Query for an user using the Provider and UserId
     /// </summary>
-    public class ExternalProviderUserQuery : IRequest<UserResult>
+    public class ExternalProviderUserQuery
     {
         public ExternalProviderUserQuery() { /* as is */ }
 

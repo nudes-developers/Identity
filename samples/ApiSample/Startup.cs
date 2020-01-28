@@ -7,8 +7,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nudes.Identity;
+using Nudes.Identity.Features.Users;
 using Nudes.Identity.Options;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ApiSample
 {
@@ -69,7 +71,20 @@ namespace ApiSample
                 });
 
             services.AddControllersWithViews()
-                .AddNudesIdentity(options => options.Account.ShowLogoutPrompt = false);
+                .AddNudesIdentity(options => options.ValidateUserCredentials = (query, cancellationToken) =>
+                {
+                    if (query.Username == "bob" && query.Password == "bob")
+                    {
+                        return Task.FromResult(new UserResult
+                        {
+                            Username = "bob",
+                            SubjectId = "bob",
+                            IsActive = true
+                        });
+                    }
+                    return Task.FromResult((UserResult)null);
+                });
+                
 
 
             // In production, the React files will be served from this directory

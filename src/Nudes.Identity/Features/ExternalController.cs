@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
+using System.Threading;
 using System.Threading.Tasks;
 using IdentityModel;
 using IdentityServer4.Events;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
-using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -24,20 +24,17 @@ namespace Nudes.Identity
         private readonly IIdentityServerInteractionService interaction;
         private readonly IClientStore clientStore;
         private readonly IEventService events;
-        private readonly IMediator mediator;
         private readonly NudesIdentityOptions options;
 
         public ExternalController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IEventService events,
-            IMediator mediator,
             NudesIdentityOptions options)
         {
             this.interaction = interaction;
             this.clientStore = clientStore;
             this.events = events;
-            this.mediator = mediator;
             this.options = options;
         }
 
@@ -196,13 +193,13 @@ namespace Nudes.Identity
 
 
             // find external user
-            var user = await mediator.Send(new ExternalProviderUserQuery(provider, providerUserId));
+            var user = await options.ExternalProviderUser(new ExternalProviderUserQuery(provider, providerUserId), CancellationToken.None);
             //var user = _users.FindByExternalProvider(provider, providerUserId);
 
             return (user, provider, providerUserId, claims);
         }
 
-        private Task<UserResult> AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims) => mediator.Send(new AutoProvisionUserCommand(provider, providerUserId, claims));
+        private Task<UserResult> AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims) => options.AutoProvisionUser(new AutoProvisionUserCommand(provider, providerUserId, claims), CancellationToken.None);
 
         private void ProcessLoginCallbackForOidc(AuthenticateResult externalResult, List<Claim> localClaims, AuthenticationProperties localSignInProps)
         {

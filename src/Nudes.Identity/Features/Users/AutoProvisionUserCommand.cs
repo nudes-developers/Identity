@@ -1,10 +1,9 @@
-﻿using MediatR;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace Nudes.Identity.Features.Users
 {
-    public class AutoProvisionUserCommand : IRequest<UserResult>
+    public class AutoProvisionUserCommand
     {
         public AutoProvisionUserCommand()
         {
