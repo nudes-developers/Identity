@@ -31,7 +31,7 @@ steps:
     feedsToUse: 'select'
     majorVersion: '1'
     minorVersion: '0'
-    patchVersion: '$(Build.ID)'
+    patchVersion: '$(Build.BuildNumber)'
 
 - task: CopyFiles@2
   displayName: 'Copy packages'
