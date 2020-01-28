@@ -28,14 +28,14 @@ steps:
   inputs:
     command: 'build'
     projects: src/**/*.csproj
-    arguments: '-- configuration $(buildConfiguration)'
+    arguments: '--configuration $(buildConfiguration)'
     feedsToUse: 'select'
     versioningScheme: byBuildNumber
 
 - task: CopyFiles@2
   displayName: 'Copy packages'
   inputs:
-    Contents: '**/.nupkg'
+    Contents: '**/*.nupkg'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
     flattenFolders: true
 
