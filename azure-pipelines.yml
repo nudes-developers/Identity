@@ -27,11 +27,8 @@ steps:
   inputs:
     command: 'build'
     projects: src/**/*.csproj
-    arguments: '--configuration $(buildConfiguration) /p:Version=1.0.$(Build.BuildNumber) /p:AssemblyVersion=1.0.$(Build.BuildNumber)'
+    arguments: '--configuration $(buildConfiguration) /p:Version=1.0.$(Build.BuildId) /p:AssemblyVersion=1.0.$(Build.BuildId)'
     feedsToUse: 'select'
-    majorVersion: '1'
-    minorVersion: '0'
-    patchVersion: '$(Build.BuildNumber)'
 
 - task: CopyFiles@2
   displayName: 'Copy packages'
