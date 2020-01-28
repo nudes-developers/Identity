@@ -1,6 +1,7 @@
 ﻿using IdentityServer4.Configuration;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.DependencyInjection;
+using Nudes.Identity.Features.Users;
 using Nudes.Identity.Options;
 using System;
 
@@ -13,9 +14,9 @@ namespace Nudes.Identity
         /// Also configures RazorViewEngineOptions to include our views and
         /// configures IdentityServerOptions to use our Cookie AuthenticationSchema
         /// </summary>
-        public static IMvcBuilder AddNudesIdentity(this IMvcBuilder builder)
+        public static IMvcBuilder AddNudesIdentity<T>(this IMvcBuilder builder) where T : class, INudesIdentityUserStorage
         {
-            ConfigureServices(builder.Services);
+            ConfigureServices<T>(builder.Services);
 
             return builder.AddApplicationPart(typeof(PublicExtensions).Assembly);
         }
@@ -26,16 +27,16 @@ namespace Nudes.Identity
         /// configures IdentityServerOptions to use our Cookie AuthenticationSchema
         /// </summary>
         /// <param name="options">Action to make changes on NudesIdentityOption</param>
-        public static IMvcBuilder AddNudesIdentity(this IMvcBuilder builder, Action<NudesIdentityOptions> options)
+        public static IMvcBuilder AddNudesIdentity<T>(this IMvcBuilder builder, Action<NudesIdentityOptions> options) where T : class, INudesIdentityUserStorage
         {
-            ConfigureServices(builder.Services);
+            ConfigureServices<T>(builder.Services);
 
             builder.Services.Configure(options);
 
             return builder.AddApplicationPart(typeof(PublicExtensions).Assembly);
         }
 
-        private static void ConfigureServices(IServiceCollection services)
+        private static void ConfigureServices<T>(IServiceCollection services) where T : class, INudesIdentityUserStorage
         {
             // Configure view location to search for razor views and pages
             services.Configure<RazorViewEngineOptions>(o =>
@@ -47,8 +48,10 @@ namespace Nudes.Identity
                 o.PageViewLocationFormats.Add("/Features/Shared/{0}.cshtml");
             });
 
+            services.AddTransient<INudesIdentityUserStorage, T>();
+
             // Configure IdentityServer to use our cookie authentication schema
-            services.Configure<IdentityServerOptions>(setup => setup.Authentication.CookieAuthenticationScheme = NudesIdentityOptions.NudesIdenitySchema);
+            services.Configure<IdentityServerOptions>(setup => setup.Authentication.CookieAuthenticationScheme = NudesIdentityOptions.NudesIdentitySchema);
 
             // Add IdentityOptions and give possibility to configure
             services.AddOptions<NudesIdentityOptions>();

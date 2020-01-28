@@ -14,7 +14,7 @@ namespace Nudes.Identity
     /// <summary>
     /// This sample controller allows a user to revoke grants given to clients
     /// </summary>
-    [Authorize(AuthenticationSchemes = NudesIdentityOptions.NudesIdenitySchema)]
+    [Authorize(AuthenticationSchemes = NudesIdentityOptions.NudesIdentitySchema)]
     public class GrantsController : Controller
     {
         private readonly IIdentityServerInteractionService interaction;
@@ -37,10 +37,7 @@ namespace Nudes.Identity
         /// Show list of grants
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-            return View("Index", await BuildViewModelAsync());
-        }
+        public async Task<IActionResult> Index() => View("Index", await BuildViewModelAsync());
 
         /// <summary>
         /// Handle postback to revoke a client

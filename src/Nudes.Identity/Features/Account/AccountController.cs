@@ -30,6 +30,7 @@ namespace Nudes.Identity
         private readonly IClientStore clientStore;
         private readonly IAuthenticationSchemeProvider schemeProvider;
         private readonly IEventService events;
+        private readonly INudesIdentityUserStorage nudesIdentityUserStorage;
         private readonly NudesIdentityOptions options;
 
         public AccountController(
@@ -37,13 +38,15 @@ namespace Nudes.Identity
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
             IEventService events,
-            IOptions<NudesIdentityOptions> options
+            IOptions<NudesIdentityOptions> options,
+            INudesIdentityUserStorage nudesIdentityUserStorage
             )
         {
             this.interaction = interaction;
             this.clientStore = clientStore;
             this.schemeProvider = schemeProvider;
             this.events = events;
+            this.nudesIdentityUserStorage = nudesIdentityUserStorage;
             this.options = options.Value;
         }
 
@@ -106,8 +109,8 @@ namespace Nudes.Identity
             {
 
                 // validate username/password against in-memory store
-                
-                var user = await options.ValidateUserCredentials(new ValidateUserCredentialsQuery(model.Username, model.Password), CancellationToken.None);
+
+                var user = await nudesIdentityUserStorage.ValidateUserCredentials(model.Username, model.Password);
                 if (user != null)
                 {
                     await events.RaiseAsync(new UserLoginSuccessEvent(user.Username, user.SubjectId, user.Username));

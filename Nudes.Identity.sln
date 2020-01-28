@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nudes.Identity", "src\Nudes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiSample", "samples\ApiSample\ApiSample.csproj", "{B86C6FC4-D746-4B99-AAD8-4D8865C561E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nudes.Identity.AspnetCoreIdentity", "Nudes.Identity.AspnetIdentity\Nudes.Identity.AspnetCoreIdentity.csproj", "{ED136DE5-8786-41DD-B5B1-B709524EE82A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{B86C6FC4-D746-4B99-AAD8-4D8865C561E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B86C6FC4-D746-4B99-AAD8-4D8865C561E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B86C6FC4-D746-4B99-AAD8-4D8865C561E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED136DE5-8786-41DD-B5B1-B709524EE82A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED136DE5-8786-41DD-B5B1-B709524EE82A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED136DE5-8786-41DD-B5B1-B709524EE82A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED136DE5-8786-41DD-B5B1-B709524EE82A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

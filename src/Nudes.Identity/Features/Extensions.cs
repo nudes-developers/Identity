@@ -44,13 +44,13 @@ namespace Nudes.Identity
             if (user.Claims != null)
                 identityUser.AdditionalClaims = user.Claims;
 
-            return context.SignInAsync(NudesIdentityOptions.NudesIdenitySchema, identityUser.CreatePrincipal(), properties);
+            return context.SignInAsync(NudesIdentityOptions.NudesIdentitySchema, identityUser.CreatePrincipal(), properties);
         }
 
         /// <summary>
         /// Internal signout method that signouts the user for the NudesIdentity schema
         /// </summary>
-        public static Task SignOutFromIdentity(this HttpContext context) => context.SignOutAsync(NudesIdentityOptions.NudesIdenitySchema);
+        public static Task SignOutFromIdentity(this HttpContext context) => context.SignOutAsync(NudesIdentityOptions.NudesIdentitySchema);
 
     }
 }

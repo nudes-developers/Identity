@@ -62,7 +62,7 @@ namespace ApiSample
 
             services
                 .AddAuthentication("Bearer")
-                .AddCookie(NudesIdentityOptions.NudesIdenitySchema)
+                .AddCookie(NudesIdentityOptions.NudesIdentitySchema)
                 .AddJwtBearer(op =>
                 {
                     op.Authority = "http://localhost:5000";
@@ -71,21 +71,7 @@ namespace ApiSample
                 });
 
             services.AddControllersWithViews()
-                .AddNudesIdentity(options => options.ValidateUserCredentials = (query, cancellationToken) =>
-                {
-                    if (query.Username == "bob" && query.Password == "bob")
-                    {
-                        return Task.FromResult(new UserResult
-                        {
-                            Username = "bob",
-                            SubjectId = "bob",
-                            IsActive = true
-                        });
-                    }
-                    return Task.FromResult((UserResult)null);
-                });
-                
-
+                .AddNudesIdentity<NudesIdentityUserStorage>();
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>

@@ -46,7 +46,7 @@ services.AddControllerWithViews()
 
 ### Set up AspnetCore Authentication
 
-All Nudes.Identity pages work based on cookie authentication using `"Nudes.Identity"` shema so we gotta set it up
+All Nudes.Identity pages work based on cookie authentication using `"Nudes.Identity"` schema so we gotta set it up
 
 On `ConfigureServices` at Startup.cs
 ```csharp

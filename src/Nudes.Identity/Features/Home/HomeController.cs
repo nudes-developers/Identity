@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Nudes.Identity
 {
-    [Authorize(AuthenticationSchemes = NudesIdentityOptions.NudesIdenitySchema)]
+    [Authorize(AuthenticationSchemes = NudesIdentityOptions.NudesIdentitySchema)]
     [AllowAnonymous]
     public class HomeController : Controller
     {

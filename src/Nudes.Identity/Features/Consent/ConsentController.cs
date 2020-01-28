@@ -16,7 +16,7 @@ namespace Nudes.Identity
     /// <summary>
     /// This controller processes the consent UI
     /// </summary>
-    [Authorize(AuthenticationSchemes = NudesIdentityOptions.NudesIdenitySchema)]
+    [Authorize(AuthenticationSchemes = NudesIdentityOptions.NudesIdentitySchema)]
     public class ConsentController : Controller
     {
         private readonly NudesIdentityOptions options;
@@ -173,31 +173,20 @@ namespace Nudes.Identity
                 {
                     var resources = await resourceStore.FindEnabledResourcesByScopeAsync(request.ScopesRequested);
                     if (resources != null && (resources.IdentityResources.Any() || resources.ApiResources.Any()))
-                    {
-                        return CreateConsentViewModel(model, returnUrl, request, client, resources);
-                    }
+                        return CreateConsentViewModel(model, returnUrl, client, resources);
                     else
-                    {
                         logger.LogError("No scopes matching: {0}", request.ScopesRequested.Aggregate((x, y) => x + ", " + y));
-                    }
                 }
                 else
-                {
                     logger.LogError("Invalid client id: {0}", request.ClientId);
-                }
             }
             else
-            {
                 logger.LogError("No consent request matching request: {0}", returnUrl);
-            }
 
             return null;
         }
 
-        private ConsentViewModel CreateConsentViewModel(
-            ConsentInputModel model, string returnUrl,
-            AuthorizationRequest request,
-            Client client, Resources resources)
+        private ConsentViewModel CreateConsentViewModel(ConsentInputModel model, string returnUrl, Client client, Resources resources)
         {
             var vm = new ConsentViewModel
             {
@@ -224,42 +213,33 @@ namespace Nudes.Identity
             return vm;
         }
 
-        private ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
+        private ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check) => new ScopeViewModel
         {
-            return new ScopeViewModel
-            {
-                Name = identity.Name,
-                DisplayName = identity.DisplayName,
-                Description = identity.Description,
-                Emphasize = identity.Emphasize,
-                Required = identity.Required,
-                Checked = check || identity.Required
-            };
-        }
+            Name = identity.Name,
+            DisplayName = identity.DisplayName,
+            Description = identity.Description,
+            Emphasize = identity.Emphasize,
+            Required = identity.Required,
+            Checked = check || identity.Required
+        };
 
-        public ScopeViewModel CreateScopeViewModel(Scope scope, bool check)
+        public ScopeViewModel CreateScopeViewModel(Scope scope, bool check) => new ScopeViewModel
         {
-            return new ScopeViewModel
-            {
-                Name = scope.Name,
-                DisplayName = scope.DisplayName,
-                Description = scope.Description,
-                Emphasize = scope.Emphasize,
-                Required = scope.Required,
-                Checked = check || scope.Required
-            };
-        }
+            Name = scope.Name,
+            DisplayName = scope.DisplayName,
+            Description = scope.Description,
+            Emphasize = scope.Emphasize,
+            Required = scope.Required,
+            Checked = check || scope.Required
+        };
 
-        private ScopeViewModel GetOfflineAccessScope(bool check)
+        private ScopeViewModel GetOfflineAccessScope(bool check) => new ScopeViewModel
         {
-            return new ScopeViewModel
-            {
-                Name = IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess,
-                DisplayName = options.Consent.OfflineAccessDisplayName,
-                Description = options.Consent.OfflineAccessDescription,
-                Emphasize = true,
-                Checked = check
-            };
-        }
+            Name = IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess,
+            DisplayName = options.Consent.OfflineAccessDisplayName,
+            Description = options.Consent.OfflineAccessDescription,
+            Emphasize = true,
+            Checked = check
+        };
     }
 }

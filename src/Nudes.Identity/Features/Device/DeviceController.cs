@@ -14,7 +14,7 @@ using Nudes.Identity.Options;
 
 namespace Nudes.Identity
 {
-    [Authorize(AuthenticationSchemes = NudesIdentityOptions.NudesIdenitySchema)]
+    [Authorize(AuthenticationSchemes = NudesIdentityOptions.NudesIdentitySchema)]
     public class DeviceController : Controller
     {
         private readonly NudesIdentityOptions options;
@@ -195,41 +195,32 @@ namespace Nudes.Identity
             return vm;
         }
 
-        private ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
+        private ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check) => new ScopeViewModel
         {
-            return new ScopeViewModel
-            {
-                Name = identity.Name,
-                DisplayName = identity.DisplayName,
-                Description = identity.Description,
-                Emphasize = identity.Emphasize,
-                Required = identity.Required,
-                Checked = check || identity.Required
-            };
-        }
+            Name = identity.Name,
+            DisplayName = identity.DisplayName,
+            Description = identity.Description,
+            Emphasize = identity.Emphasize,
+            Required = identity.Required,
+            Checked = check || identity.Required
+        };
 
-        public ScopeViewModel CreateScopeViewModel(Scope scope, bool check)
+        public ScopeViewModel CreateScopeViewModel(Scope scope, bool check) => new ScopeViewModel
         {
-            return new ScopeViewModel
-            {
-                Name = scope.Name,
-                DisplayName = scope.DisplayName,
-                Description = scope.Description,
-                Emphasize = scope.Emphasize,
-                Required = scope.Required,
-                Checked = check || scope.Required
-            };
-        }
-        private ScopeViewModel GetOfflineAccessScope(bool check)
+            Name = scope.Name,
+            DisplayName = scope.DisplayName,
+            Description = scope.Description,
+            Emphasize = scope.Emphasize,
+            Required = scope.Required,
+            Checked = check || scope.Required
+        };
+        private ScopeViewModel GetOfflineAccessScope(bool check) => new ScopeViewModel
         {
-            return new ScopeViewModel
-            {
-                Name = IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess,
-                DisplayName = options.Consent.OfflineAccessDisplayName,
-                Description = options.Consent.OfflineAccessDescription,
-                Emphasize = true,
-                Checked = check
-            };
-        }
+            Name = IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess,
+            DisplayName = options.Consent.OfflineAccessDisplayName,
+            Description = options.Consent.OfflineAccessDescription,
+            Emphasize = true,
+            Checked = check
+        };
     }
 }

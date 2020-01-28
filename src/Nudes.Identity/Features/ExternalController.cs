@@ -25,17 +25,21 @@ namespace Nudes.Identity
         private readonly IClientStore clientStore;
         private readonly IEventService events;
         private readonly NudesIdentityOptions options;
+        private readonly INudesIdentityUserStorage nudesIdentityUserStorage;
 
         public ExternalController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IEventService events,
-            NudesIdentityOptions options)
+            NudesIdentityOptions options,
+            INudesIdentityUserStorage nudesIdentityUserStorage
+            )
         {
             this.interaction = interaction;
             this.clientStore = clientStore;
             this.events = events;
             this.options = options;
+            this.nudesIdentityUserStorage = nudesIdentityUserStorage;
         }
 
         /// <summary>
@@ -193,13 +197,12 @@ namespace Nudes.Identity
 
 
             // find external user
-            var user = await options.ExternalProviderUser(new ExternalProviderUserQuery(provider, providerUserId), CancellationToken.None);
-            //var user = _users.FindByExternalProvider(provider, providerUserId);
+            var user = await nudesIdentityUserStorage.ExternalProvider(provider, providerUserId);
 
             return (user, provider, providerUserId, claims);
         }
 
-        private Task<UserResult> AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims) => options.AutoProvisionUser(new AutoProvisionUserCommand(provider, providerUserId, claims), CancellationToken.None);
+        private Task<UserResult> AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims) => nudesIdentityUserStorage.AutoProvision(provider, providerUserId, claims);
 
         private void ProcessLoginCallbackForOidc(AuthenticateResult externalResult, List<Claim> localClaims, AuthenticationProperties localSignInProps)
         {
