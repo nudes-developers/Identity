@@ -1,4 +1,3 @@
-using ApiSample.Models;
 using IdentityServer4;
 using IdentityServer4.Models;
 using MediatR;
@@ -8,10 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nudes.Identity;
-using Nudes.Identity.Features.Users;
-using Nudes.Identity.Options;
+using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ApiSample
 {
@@ -24,57 +21,65 @@ namespace ApiSample
 
         public IConfiguration Configuration { get; }
 
+
+        const string client_uri = "http://192.168.137.105";
+        const string client_port = "5003";
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            services.AddIdentityServer()
-                .AddInMemoryApiResources(new List<ApiResource>()
+            services.AddIdentityServer(op =>
+            {
+                op.IssuerUri = "http://192.168.137.1:5000";
+            }).AddInMemoryApiResources(new List<ApiResource>()
+            {
+                new ApiResource("api1", "My API #1")
+            }).AddInMemoryIdentityResources(new List<IdentityResource>()
+            {
+                new IdentityResources.OpenId(),
+                new IdentityResources.Profile()
+            }).AddInMemoryClients(new List<Client>()
+            {
+                new Client
                 {
-                    new ApiResource("api1", "My API #1")
-                })
-                .AddInMemoryIdentityResources(new List<IdentityResource>()
-                {
-                    new IdentityResources.OpenId(),
-                    new IdentityResources.Profile()
-                })
-                .AddInMemoryClients(new List<Client>()
-                {
-                    new Client
+                    ClientId = "revisor_code",
+                    AllowedGrantTypes = GrantTypes.Code,
+                    RequirePkce = true,
+                    RequireClientSecret = false,
+                    RequireConsent = true,
+                    RedirectUris =           { $"{client_uri}:{client_port}/callback" },
+                    PostLogoutRedirectUris = { $"{client_uri}:{client_port}" },
+                    AllowedCorsOrigins =     { $"{client_uri}:{client_port}" },
+                    AccessTokenLifetime= 120,
+                    AllowOfflineAccess = true,
+                    AllowedScopes =
                     {
-                        ClientId = "client-admin",
-                        AllowedGrantTypes = GrantTypes.Code,
-                        RequirePkce = true,
-                        RequireClientSecret = false,
-                        RequireConsent = false,
-                        RedirectUris =           { "http://localhost:3000/callback.html" },
-                        PostLogoutRedirectUris = { "http://localhost:3000/" },
-                        AllowedCorsOrigins =     { "http://localhost:3000" },
-
-                        AllowedScopes =
-                        {
-                            IdentityServerConstants.StandardScopes.OpenId,
-                            IdentityServerConstants.StandardScopes.Profile,
-                            "api1"
-                        }
-                    },
-                })
-                .AddDeveloperSigningCredential();
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        "api1"
+                    }
+                },
+            }).AddDeveloperSigningCredential();
 
             services
-                .AddAuthentication("Bearer")
-                .AddCookie(NudesIdentityOptions.NudesIdentitySchema)
-                .AddJwtBearer(op =>
+                .AddAuthentication(conf =>
                 {
-                    op.Authority = "http://localhost:5000";
+                    conf.DefaultScheme = "Bearer";
+                })
+                .AddJwtBearer("Bearer", op =>
+                {
+                    op.Authority = "http://192.168.137.1:5000";
                     op.Audience = "api1";
                     op.RequireHttpsMetadata = false;
+                    op.TokenValidationParameters.ValidateLifetime = true;
+                    op.TokenValidationParameters.ClockSkew = TimeSpan.Zero;
                 });
 
             services.AddControllersWithViews()
                 .AddNudesIdentity<NudesIdentityUserStorage>();
 
-            /* or using this if you are using Aspnetcore Identity (requires de Nudes.Identity.AspnetCoreIdentity package
+            /* 
+             * or using this if you are using Aspnetcore Identity (requires de Nudes.Identity.AspnetCoreIdentity package
                services.AddControllersWithViews()
                 .AddNudesAspnetCoreIdentity<User>();
             */
@@ -87,17 +92,15 @@ namespace ApiSample
 
             services.AddMediatR(this.GetType().Assembly);
 
-            //services.Configure<NudesIdentityOptions>(d => d.ShowLogoutPrompt = false);
-
             services.AddCors(s => s.AddPolicy("corsPolicy", d =>
             {
-                d.WithOrigins("http://localhost:3000")
+                d.WithOrigins($"{client_uri}:{client_port}")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();
             }));
 
-           
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using IdentityServer4;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
@@ -14,7 +15,7 @@ using Nudes.Identity.Options;
 
 namespace Nudes.Identity
 {
-    [Authorize(AuthenticationSchemes = NudesIdentityOptions.NudesIdentitySchema)]
+    [Authorize(AuthenticationSchemes = IdentityServerConstants.DefaultCookieAuthenticationScheme)]
     public class DeviceController : Controller
     {
         private readonly NudesIdentityOptions options;

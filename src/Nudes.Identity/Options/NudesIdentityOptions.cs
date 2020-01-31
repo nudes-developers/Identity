@@ -7,7 +7,6 @@ namespace Nudes.Identity.Options
 {
     public class NudesIdentityOptions
     {
-        public const string NudesIdentitySchema = "NudesIdentity";
         public AccountOptions Account { get; set; } = new AccountOptions();
         public ConsentOptions Consent { get; set; } = new ConsentOptions();
     }

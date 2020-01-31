@@ -10,13 +10,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Nudes.Identity.Options;
+using IdentityServer4;
 
 namespace Nudes.Identity
 {
     /// <summary>
     /// This controller processes the consent UI
     /// </summary>
-    [Authorize(AuthenticationSchemes = NudesIdentityOptions.NudesIdentitySchema)]
+    [Authorize(AuthenticationSchemes = IdentityServerConstants.DefaultCookieAuthenticationScheme)]
     public class ConsentController : Controller
     {
         private readonly NudesIdentityOptions options;

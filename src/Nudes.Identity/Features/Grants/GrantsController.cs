@@ -8,13 +8,14 @@ using Microsoft.AspNetCore.Authorization;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using Nudes.Identity.Options;
+using IdentityServer4;
 
 namespace Nudes.Identity
 {
     /// <summary>
     /// This sample controller allows a user to revoke grants given to clients
     /// </summary>
-    [Authorize(AuthenticationSchemes = NudesIdentityOptions.NudesIdentitySchema)]
+    [Authorize(AuthenticationSchemes = IdentityServerConstants.DefaultCookieAuthenticationScheme)]
     public class GrantsController : Controller
     {
         private readonly IIdentityServerInteractionService interaction;

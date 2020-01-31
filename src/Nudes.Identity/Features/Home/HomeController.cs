@@ -1,3 +1,4 @@
+using IdentityServer4;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Nudes.Identity
 {
-    [Authorize(AuthenticationSchemes = NudesIdentityOptions.NudesIdentitySchema)]
+    [Authorize(AuthenticationSchemes = IdentityServerConstants.DefaultCookieAuthenticationScheme)]
     [AllowAnonymous]
     public class HomeController : Controller
     {

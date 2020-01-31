@@ -1,4 +1,5 @@
-﻿using IdentityServer4.Configuration;
+﻿using IdentityServer4;
+using IdentityServer4.Configuration;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.DependencyInjection;
 using Nudes.Identity.Features.Users;
@@ -50,8 +51,18 @@ namespace Nudes.Identity
 
             services.AddTransient<INudesIdentityUserStorage, T>();
 
-            // Configure IdentityServer to use our cookie authentication schema
-            services.Configure<IdentityServerOptions>(setup => setup.Authentication.CookieAuthenticationScheme = NudesIdentityOptions.NudesIdentitySchema);
+            // Configure IdentityServerOptions
+            services.Configure<IdentityServerOptions>(op =>
+            {
+                op.Authentication.CookieAuthenticationScheme = IdentityServerConstants.DefaultCookieAuthenticationScheme;
+
+                op.UserInteraction = new UserInteractionOptions()
+                {
+                    LogoutUrl = "/account/logout",
+                    LoginUrl = "/account/login",
+                    LoginReturnUrlParameter = "returnUrl"
+                };
+            });
 
             // Add IdentityOptions and give possibility to configure
             services.AddOptions<NudesIdentityOptions>();
