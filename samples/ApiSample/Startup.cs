@@ -3,6 +3,7 @@ using IdentityServer4.Models;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -78,6 +79,8 @@ namespace ApiSample
             services.AddControllersWithViews()
                 .AddNudesIdentity<NudesIdentityUserStorage>();
 
+            services.AddDbContext<Db>(d => d.UseInMemoryDatabase("nudes"));
+
             /* 
              * or using this if you are using Aspnetcore Identity (requires de Nudes.Identity.AspnetCoreIdentity package
                services.AddControllersWithViews()
@@ -99,8 +102,6 @@ namespace ApiSample
                     .AllowAnyMethod()
                     .AllowCredentials();
             }));
-
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

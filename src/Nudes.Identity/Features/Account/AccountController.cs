@@ -222,6 +222,35 @@ namespace Nudes.Identity
             return View("LoggedOut", vm);
         }
 
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View(false);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword(string username)
+        {
+            await nudesIdentityUserStorage.GenerateResetPasswordTokenFor(username);
+            return View(true);
+        }
+
+        [HttpGet("/Account/ResetPassword/{token}")]
+        public async Task<IActionResult> ResetPassword(string token)
+        {
+            var isValid = await nudesIdentityUserStorage.IsResetPasswordTokenValid(token);
+            return View((isValid, token));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword([FromForm]string token, [FromForm]string password)
+        {
+            await nudesIdentityUserStorage.ConsumeResetPasswordToken(token, password);
+            return LocalRedirect("/Account/Login");
+        }
+
+
         /*****************************************/
         /* helper APIs for the AccountController */
         /*****************************************/
