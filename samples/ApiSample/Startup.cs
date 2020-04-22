@@ -23,15 +23,15 @@ namespace ApiSample
         public IConfiguration Configuration { get; }
 
 
-        const string client_uri = "http://192.168.137.105";
-        const string client_port = "5003";
+        const string client_uri = "http://192.168.0.100";
+        const string client_port = "3000";
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddIdentityServer(op =>
             {
-                op.IssuerUri = "http://192.168.137.1:5000";
+                op.IssuerUri = "http://192.168.0.100:5000";
             }).AddInMemoryApiResources(new List<ApiResource>()
             {
                 new ApiResource("api1", "My API #1")
@@ -51,7 +51,7 @@ namespace ApiSample
                     RedirectUris =           { $"{client_uri}:{client_port}/callback" },
                     PostLogoutRedirectUris = { $"{client_uri}:{client_port}" },
                     AllowedCorsOrigins =     { $"{client_uri}:{client_port}" },
-                    AccessTokenLifetime= 120,
+                    AccessTokenLifetime= 80,
                     AllowOfflineAccess = true,
                     AllowedScopes =
                     {
@@ -69,7 +69,7 @@ namespace ApiSample
                 })
                 .AddJwtBearer("Bearer", op =>
                 {
-                    op.Authority = "http://192.168.137.1:5000";
+                    op.Authority = "http://192.168.0.100:5000";
                     op.Audience = "api1";
                     op.RequireHttpsMetadata = false;
                     op.TokenValidationParameters.ValidateLifetime = true;

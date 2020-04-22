@@ -25,10 +25,12 @@ namespace ApiSample
         {
             if (username == "bob")
             {
-                db.ResetPasswordTokens.Add(new Models.ResetPasswordToken
+                var a = new Models.ResetPasswordToken
                 {
                     UserId = Guid.Parse(bobId),
-                });
+                };
+
+                db.ResetPasswordTokens.Add(a);
                 await db.SaveChangesAsync(cancellationToken);
             }
         }
