@@ -9,7 +9,7 @@ namespace ApiSample.Controllers
 {
     [Authorize] //Will require your default authentication schema in this case Bearer
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Logging;
 using Nudes.Identity;
 using System;
 using System.Collections.Generic;
@@ -23,15 +24,16 @@ namespace ApiSample
         public IConfiguration Configuration { get; }
 
 
-        const string client_uri = "http://192.168.0.100";
+        const string client_uri = "http://192.168.15.10";
         const string client_port = "3000";
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            IdentityModelEventSource.ShowPII = true;
             services.AddIdentityServer(op =>
             {
-                op.IssuerUri = "http://192.168.0.100:5000";
+                op.IssuerUri = "https://nudesidentity.azurewebsites.net";
             }).AddInMemoryApiResources(new List<ApiResource>()
             {
                 new ApiResource("api1", "My API #1")
@@ -60,7 +62,27 @@ namespace ApiSample
                         "api1"
                     }
                 },
+                new Client
+                {
+                    ClientId = "app_code",
+                    AllowedGrantTypes = GrantTypes.Code,
+                    RequirePkce = false,
+                    RequireClientSecret = false,
+                    RequireConsent = true,
+                    RedirectUris =           { $"myapp://auth_callback" },
+                    PostLogoutRedirectUris = { $"myapp://auth_callback" },
+                    AccessTokenLifetime= 120,
+                    AllowOfflineAccess = true,
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        "api1"
+                    }
+                },
             }).AddDeveloperSigningCredential();
+
+
 
             services
                 .AddAuthentication(conf =>
@@ -69,7 +91,7 @@ namespace ApiSample
                 })
                 .AddJwtBearer("Bearer", op =>
                 {
-                    op.Authority = "http://192.168.0.100:5000";
+                    op.Authority = "https://nudesidentity.azurewebsites.net";
                     op.Audience = "api1";
                     op.RequireHttpsMetadata = false;
                     op.TokenValidationParameters.ValidateLifetime = true;
