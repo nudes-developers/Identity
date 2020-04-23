@@ -1,0 +1,3 @@
+[submodule "samples/SpaSample/nudes-identity-react-sample"]
+	path = samples/SpaSample/nudes-identity-react-sample
+	url = https://github.com/nudes-senaisp/nudes-identity-react-sample.git
