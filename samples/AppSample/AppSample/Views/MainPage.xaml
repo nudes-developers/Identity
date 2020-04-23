@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+	xmlns="http://xamarin.com/schemas/2014/forms"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:viewmodels="clr-namespace:AppSample.ViewModels"
+	mc:Ignorable="d"
+	x:Class="AppSample.Views.MainPage">
+	<ContentPage.BindingContext>
+		<viewmodels:MainViewModel
+			x:Name="vm" />
+	</ContentPage.BindingContext>
+	<ContentPage.Content>
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition
+						Height="60" />
+					<RowDefinition
+						Height="60" />
+					<RowDefinition
+						Height="1*" />
+				</Grid.RowDefinitions>
+
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition
+						Width="1*" />
+					<ColumnDefinition
+						Width="1*" />
+				</Grid.ColumnDefinitions>
+
+				<ActivityIndicator
+					Grid.ColumnSpan="2"
+					IsRunning="{Binding IsBusy}" />
+
+				<Button
+					Grid.Row="1"
+					Command="{Binding AuthCommand}"
+					Text="Auth" />
+
+				<Button
+					Grid.Row="1"
+					Command="{Binding GetCommand}"
+					Grid.Column="1"
+					Text="Access API" />
+				
+					<Editor
+						Grid.Row="2"
+						Grid.ColumnSpan="2"
+						Text="{Binding Text}"
+						VerticalOptions="FillAndExpand" />
+			</Grid>
+	</ContentPage.Content>
+</ContentPage>
