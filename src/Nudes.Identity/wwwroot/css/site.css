@@ -1,6 +1,4 @@
 ﻿body {
-    margin-top: 65px;
-    min-height: calc(100vh - 65px);
     background: rgb(24,45,64);
     background: linear-gradient(125deg, rgba(24,45,64,1) 0%, rgba(0,169,227,1) 100%);
     background-repeat: no-repeat;
@@ -12,10 +10,11 @@
     display: flex;
     min-height: 100%;
     align-items: center;
+    padding-bottom: 64px;
 }
 
-.panel {
-    padding: 36px;
+.card {
+    padding: 24px;
 }
 
 .page-title {
@@ -57,9 +56,13 @@
     margin: 16px 0;
 }
 
-.consent-buttons > .panel-heading {
+.card > .consent-heading {
     text-align: center;
     border: 0;
+    background-color: #F2F2F2;
+    font-weight: 600;
+    line-height: 30px;
+    margin-bottom: 12px;
 }
 
 .consent-buttons > .list-group > .list-group-item:last-child {

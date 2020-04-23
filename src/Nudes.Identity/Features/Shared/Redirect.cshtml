@@ -1,7 +1,11 @@
 @model RedirectViewModel
 
-<h1>You are now being returned to the application.</h1>
-<p>Once complete, you may close this tab</p>
+<div class="logged-out">
+    <h1 class="title">You are now being returned to the application.</h1>
+    <h1 class="message">
+        <small>Once complete, you may close this tab</small>
+    </h1>
+</div>
 
 <meta http-equiv="refresh" content="0;url=@Model.RedirectUrl" data-url="@Model.RedirectUrl">
 @*<script src="~/js/signin-redirect.js"></script>*@
