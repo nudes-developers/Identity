@@ -65,8 +65,8 @@ namespace ApiSample
                 new Client
                 {
                     ClientId = "app_code",
-                    AllowedGrantTypes = GrantTypes.Code,
-                    RequirePkce = false,
+                    AllowedGrantTypes = GrantTypes.Code,    
+                    RequirePkce = true,
                     RequireClientSecret = false,
                     RequireConsent = true,
                     RedirectUris =           { $"myapp://auth_callback" },
