@@ -35,5 +35,12 @@ namespace Nudes.Identity.AspnetCoreIdentity
             else
                 return null;
         }
+
+
+        public Task GenerateResetPasswordTokenFor(string username, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
+        public Task<bool> IsResetPasswordTokenValid(string token, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
+        public Task ConsumeResetPasswordToken(string token, string newPassword, CancellationToken cancellationToken = default) => throw new NotImplementedException();
     }
 }
