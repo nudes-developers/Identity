@@ -9,5 +9,7 @@ namespace Nudes.Identity.Options
     {
         public AccountOptions Account { get; set; } = new AccountOptions();
         public ConsentOptions Consent { get; set; } = new ConsentOptions();
+
+        public LayoutOptions Layout { get; set; } = new LayoutOptions();
     }
 }

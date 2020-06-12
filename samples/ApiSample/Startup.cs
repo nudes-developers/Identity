@@ -99,7 +99,12 @@ namespace ApiSample
                 });
 
             services.AddControllersWithViews()
-                .AddNudesIdentity<NudesIdentityUserStorage>();
+                .AddNudesIdentity<NudesIdentityUserStorage>(options =>
+                {
+                    options.Layout.Name = "My custom name";
+                    options.Layout.LogoUrl = "http://istic.senai.io/assets/images/Logo-ISTIC.svg";
+                    options.Layout.FavIcon = "https://identityserver.io/images/favicon.ico";
+                });
 
             services.AddDbContext<Db>(d => d.UseInMemoryDatabase("nudes"));
 
