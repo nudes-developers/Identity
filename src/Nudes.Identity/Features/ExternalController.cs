@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Nudes.Identity.Features.Users;
 using Nudes.Identity.Options;
 
@@ -31,14 +32,14 @@ namespace Nudes.Identity
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IEventService events,
-            NudesIdentityOptions options,
+            IOptions<NudesIdentityOptions> options,
             INudesIdentityUserStorage nudesIdentityUserStorage
             )
         {
             this.interaction = interaction;
             this.clientStore = clientStore;
             this.events = events;
-            this.options = options;
+            this.options = options.Value;
             this.nudesIdentityUserStorage = nudesIdentityUserStorage;
         }
 
