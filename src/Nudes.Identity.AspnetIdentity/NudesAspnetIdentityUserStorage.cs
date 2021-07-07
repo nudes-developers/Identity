@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using IdentityServer4.Models;
+using Microsoft.AspNetCore.Identity;
 using Nudes.Identity.Features.Users;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace Nudes.Identity.AspnetCoreIdentity
 
         public Task<UserResult> AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public Task<UserResult> FindByExternalProvider(string provider, string userId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-        public async Task<UserResult> ValidateUserCredentials(string username, string password, CancellationToken cancellationToken = default)
+        public async Task<UserResult> ValidateUserCredentials(string username, string password, Client client, CancellationToken cancellationToken = default)
         {
             var user = await userManager.FindByNameAsync(username);
             if (await userManager.CheckPasswordAsync(user, password))
