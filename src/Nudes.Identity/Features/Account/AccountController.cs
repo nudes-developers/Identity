@@ -88,14 +88,11 @@ namespace Nudes.Identity
                     // if the user cancels, send a result back into IdentityServer as if they 
                     // denied the consent (even if this client does not require consent).
                     // this will send back an access denied OIDC error response to the client.
-                    await interaction.GrantConsentAsync(context, ConsentResponse.Denied);
+                    await interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
 
-                    // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-                    if (await clientStore.IsPkceClientAsync(context.ClientId))
+                    if (context.IsNativeClient())
                     {
-                        // if the client is PKCE then we assume it's native, so this change in how to
-                        // return the response is for better UX for the end user.
-                        return View("Redirect", new RedirectViewModel { RedirectUrl = model.ReturnUrl });
+                        return this.LoadingPage("Redirect", model.ReturnUrl);
                     }
 
                     return Redirect(model.ReturnUrl);
@@ -112,10 +109,10 @@ namespace Nudes.Identity
 
                 // validate username/password against in-memory store
 
-                var user = await nudesIdentityUserStorage.ValidateUserCredentials(model.Username, model.Password);
+                var user = await nudesIdentityUserStorage.ValidateUserCredentials(model.Username, model.Password, context?.Client);
                 if (user != null)
                 {
-                    await events.RaiseAsync(new UserLoginSuccessEvent(user.Username, user.SubjectId, user.Username));
+                    await events.RaiseAsync(new UserLoginSuccessEvent(user.Username, user.SubjectId, user.Username, clientId: context?.Client.ClientId));
 
                     // only set explicit expiration here if user chooses "remember me". 
                     // otherwise we rely upon expiration configured in cookie middleware.
@@ -129,17 +126,14 @@ namespace Nudes.Identity
 
                     // issue authentication cookie with subject ID and username
                     //await HttpContext.SignInAsync(user.SubjectId, user.Username, props);
-
+                    
                     await HttpContext.SignInAsync(user, props);
 
                     if (context != null)
                     {
-                        // if the client is PKCE then we assume it's native, so this change in how to
-                        // return the response is for better UX for the end user.
-                        if (await clientStore.IsPkceClientAsync(context.ClientId))
-                            return View("Redirect", new RedirectViewModel { RedirectUrl = model.ReturnUrl });
+                        if (context.IsNativeClient())
+                            return this.LoadingPage("Redirect", model.ReturnUrl);
 
-                        // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
                         return Redirect(model.ReturnUrl);
                     }
 
@@ -159,7 +153,7 @@ namespace Nudes.Identity
                     }
                 }
 
-                await events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials"));
+                await events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId: context?.Client.ClientId));
                 ModelState.AddModelError(string.Empty, options.Account.InvalidCredentialsErrorMessage);
             }
 
@@ -290,9 +284,9 @@ namespace Nudes.Identity
                 }).ToList();
 
             var allowLocal = true;
-            if (context?.ClientId != null)
+            if (context?.Client.ClientId != null)
             {
-                var client = await clientStore.FindEnabledClientByIdAsync(context.ClientId);
+                var client = await clientStore.FindEnabledClientByIdAsync(context.Client.ClientId);
                 if (client != null)
                 {
                     allowLocal = client.EnableLocalLogin;

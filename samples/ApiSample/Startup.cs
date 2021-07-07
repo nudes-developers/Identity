@@ -24,7 +24,7 @@ namespace ApiSample
         public IConfiguration Configuration { get; }
 
 
-        const string client_uri = "http://192.168.15.10";
+        const string client_uri = "http://192.168.15.24";
         const string client_port = "3000";
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -40,7 +40,11 @@ namespace ApiSample
             }).AddInMemoryIdentityResources(new List<IdentityResource>()
             {
                 new IdentityResources.OpenId(),
-                new IdentityResources.Profile()
+                new IdentityResources.Profile(),
+                new IdentityResource()
+            }).AddInMemoryApiScopes(new List<ApiScope>() 
+            {
+                new ApiScope("api1", "Api 1")
             }).AddInMemoryClients(new List<Client>()
             {
                 new Client
@@ -65,7 +69,7 @@ namespace ApiSample
                 new Client
                 {
                     ClientId = "app_code",
-                    AllowedGrantTypes = GrantTypes.Code,    
+                    AllowedGrantTypes = GrantTypes.Code,
                     RequirePkce = true,
                     RequireClientSecret = false,
                     RequireConsent = true,

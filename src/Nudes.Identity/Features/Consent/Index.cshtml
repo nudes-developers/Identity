@@ -42,14 +42,14 @@
                         </ul>
                     }
 
-                    @if (Model.ResourceScopes.Any())
+                    @if (Model.ApiScopes.Any())
                     {
                         <div class="consent-heading">
                             <span class="glyphicon glyphicon-tasks"></span>
                             Application Access
                         </div>
                         <ul class="list-group list-group-flush">
-                            @foreach (var scope in Model.ResourceScopes)
+                            @foreach (var scope in Model.ApiScopes)
                             {
                                 <partial name="_ScopeListItem" model="scope" />
                             }

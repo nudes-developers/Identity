@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Nudes.Identity.Options;
 using IdentityServer4;
+using System.Collections.Generic;
+using System;
+using IdentityServer4.Validation;
 
 namespace Nudes.Identity
 {
@@ -71,7 +74,9 @@ namespace Nudes.Identity
 
             if (result.IsRedirect)
             {
-                if (await clientStore.IsPkceClientAsync(result.ClientId))
+
+                var context = await interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+                if (context?.IsNativeClient() == true)
                 {
                     // if the client is PKCE then we assume it's native, so this change in how to
                     // return the response is for better UX for the end user.
@@ -110,10 +115,11 @@ namespace Nudes.Identity
             // user clicked 'no' - send back the standard 'access_denied' response
             if (model?.Button == "no")
             {
-                grantedConsent = ConsentResponse.Denied;
+
+                grantedConsent = new ConsentResponse { Error = AuthorizationError.AccessDenied };
 
                 // emit event
-                await events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.ClientId, request.ScopesRequested));
+                await events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues));
             }
             // user clicked 'yes' - validate the data
             else if (model?.Button == "yes")
@@ -130,11 +136,12 @@ namespace Nudes.Identity
                     grantedConsent = new ConsentResponse
                     {
                         RememberConsent = model.RememberConsent,
-                        ScopesConsented = scopes.ToArray()
+                        ScopesValuesConsented = scopes.ToArray(),
+                        Description = model.Description
                     };
 
                     // emit event
-                    await events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.ClientId, request.ScopesRequested, grantedConsent.ScopesConsented, grantedConsent.RememberConsent));
+                    await events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.Client.ClientId, request.ValidatedResources.RawScopeValues, grantedConsent.ScopesValuesConsented, grantedConsent.RememberConsent));
                 }
                 else
                 {
@@ -153,7 +160,7 @@ namespace Nudes.Identity
 
                 // indicate that's it ok to redirect back to authorization endpoint
                 result.RedirectUri = model.ReturnUrl;
-                result.ClientId = request.ClientId;
+                result.Client = request.Client;
             }
             else
             {
@@ -168,75 +175,83 @@ namespace Nudes.Identity
         {
             var request = await interaction.GetAuthorizationContextAsync(returnUrl);
             if (request != null)
-            {
-                var client = await clientStore.FindEnabledClientByIdAsync(request.ClientId);
-                if (client != null)
-                {
-                    var resources = await resourceStore.FindEnabledResourcesByScopeAsync(request.ScopesRequested);
-                    if (resources != null && (resources.IdentityResources.Any() || resources.ApiResources.Any()))
-                        return CreateConsentViewModel(model, returnUrl, client, resources);
-                    else
-                        logger.LogError("No scopes matching: {0}", request.ScopesRequested.Aggregate((x, y) => x + ", " + y));
-                }
-                else
-                    logger.LogError("Invalid client id: {0}", request.ClientId);
-            }
+                return CreateConsentViewModel(model, returnUrl, request);
             else
                 logger.LogError("No consent request matching request: {0}", returnUrl);
 
             return null;
         }
 
-        private ConsentViewModel CreateConsentViewModel(ConsentInputModel model, string returnUrl, Client client, Resources resources)
+        private ConsentViewModel CreateConsentViewModel(
+           ConsentInputModel model, string returnUrl,
+           AuthorizationRequest request)
         {
             var vm = new ConsentViewModel
             {
                 RememberConsent = model?.RememberConsent ?? true,
                 ScopesConsented = model?.ScopesConsented ?? Enumerable.Empty<string>(),
+                Description = model?.Description,
 
                 ReturnUrl = returnUrl,
 
-                ClientName = client.ClientName ?? client.ClientId,
-                ClientUrl = client.ClientUri,
-                ClientLogoUrl = client.LogoUri,
-                AllowRememberConsent = client.AllowRememberConsent
+                ClientName = request.Client.ClientName ?? request.Client.ClientId,
+                ClientUrl = request.Client.ClientUri,
+                ClientLogoUrl = request.Client.LogoUri,
+                AllowRememberConsent = request.Client.AllowRememberConsent
             };
 
-            vm.IdentityScopes = resources.IdentityResources.Select(x => CreateScopeViewModel(x, vm.ScopesConsented.Contains(x.Name) || model == null)).ToArray();
-            vm.ResourceScopes = resources.ApiResources.SelectMany(x => x.Scopes).Select(x => CreateScopeViewModel(x, vm.ScopesConsented.Contains(x.Name) || model == null)).ToArray();
-            if (options.Consent.EnableOfflineAccess && resources.OfflineAccess)
+            vm.IdentityScopes = request.ValidatedResources.Resources.IdentityResources.Select(x => CreateScopeViewModel(x, vm.ScopesConsented.Contains(x.Name) || model == null)).ToArray();
+
+            var apiScopes = new List<ScopeViewModel>();
+            foreach (var parsedScope in request.ValidatedResources.ParsedScopes)
             {
-                vm.ResourceScopes = vm.ResourceScopes.Union(new ScopeViewModel[] {
-                    GetOfflineAccessScope(vm.ScopesConsented.Contains(IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess) || model == null)
-                });
+                var apiScope = request.ValidatedResources.Resources.FindApiScope(parsedScope.ParsedName);
+                if (apiScope != null)
+                {
+                    var scopeVm = CreateScopeViewModel(parsedScope, apiScope, vm.ScopesConsented.Contains(parsedScope.RawValue) || model == null);
+                    apiScopes.Add(scopeVm);
+                }
             }
+            if (options.Consent.EnableOfflineAccess && request.ValidatedResources.Resources.OfflineAccess)
+                apiScopes.Add(GetOfflineAccessScope(vm.ScopesConsented.Contains(IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess) || model == null));
+            vm.ApiScopes = apiScopes;
 
             return vm;
         }
 
+
         private ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check) => new ScopeViewModel
         {
-            Name = identity.Name,
-            DisplayName = identity.DisplayName,
+            Value = identity.Name,
+            DisplayName = identity.DisplayName ?? identity.Name,
             Description = identity.Description,
             Emphasize = identity.Emphasize,
             Required = identity.Required,
             Checked = check || identity.Required
         };
 
-        public ScopeViewModel CreateScopeViewModel(Scope scope, bool check) => new ScopeViewModel
+        public ScopeViewModel CreateScopeViewModel(ParsedScopeValue parsedScopeValue, ApiScope apiScope, bool check)
         {
-            Name = scope.Name,
-            DisplayName = scope.DisplayName,
-            Description = scope.Description,
-            Emphasize = scope.Emphasize,
-            Required = scope.Required,
-            Checked = check || scope.Required
-        };
+            var displayName = apiScope.DisplayName ?? apiScope.Name;
+            if (!String.IsNullOrWhiteSpace(parsedScopeValue.ParsedParameter))
+            {
+                displayName += ":" + parsedScopeValue.ParsedParameter;
+            }
+
+            return new ScopeViewModel
+            {
+                Value = parsedScopeValue.RawValue,
+                DisplayName = displayName,
+                Description = apiScope.Description,
+                Emphasize = apiScope.Emphasize,
+                Required = apiScope.Required,
+                Checked = check || apiScope.Required
+            };
+        }
 
         private ScopeViewModel GetOfflineAccessScope(bool check) => new ScopeViewModel
         {
-            Name = IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess,
+            Value = IdentityServerConstants.StandardScopes.OfflineAccess,
             DisplayName = options.Consent.OfflineAccessDisplayName,
             Description = options.Consent.OfflineAccessDescription,
             Emphasize = true,

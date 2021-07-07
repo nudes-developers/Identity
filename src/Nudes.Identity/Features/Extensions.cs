@@ -1,8 +1,11 @@
+using System;
 using System.Threading.Tasks;
 using IdentityServer4;
+using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Nudes.Identity.Features.Users;
 using Nudes.Identity.Options;
@@ -26,6 +29,12 @@ namespace Nudes.Identity
             }
 
             return false;
+        }
+
+        public static bool IsNativeClient(this AuthorizationRequest context)
+        {
+            return !context.RedirectUri.StartsWith("https", StringComparison.Ordinal)
+               && !context.RedirectUri.StartsWith("http", StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -52,5 +61,13 @@ namespace Nudes.Identity
         /// </summary>
         public static Task SignOutFromIdentity(this HttpContext context) => context.SignOutAsync(IdentityServerConstants.DefaultCookieAuthenticationScheme);
 
+
+        public static IActionResult LoadingPage(this Controller controller, string viewName, string redirectUri)
+        {
+            controller.HttpContext.Response.StatusCode = 200;
+            controller.HttpContext.Response.Headers["Location"] = "";
+
+            return controller.View(viewName, new RedirectViewModel { RedirectUrl = redirectUri });
+        }
     }
 }

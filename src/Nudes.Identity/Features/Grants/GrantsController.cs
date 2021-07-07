@@ -55,7 +55,7 @@ namespace Nudes.Identity
 
         private async Task<GrantsViewModel> BuildViewModelAsync()
         {
-            var grants = await interaction.GetAllUserConsentsAsync();
+            var grants = await interaction.GetAllUserGrantsAsync();
 
             var list = new List<GrantViewModel>();
             foreach(var grant in grants)

@@ -1,10 +1,12 @@
+using IdentityServer4.Models;
+
 namespace Nudes.Identity
 {
     public class ProcessConsentResult
     {
         public bool IsRedirect => RedirectUri != null;
         public string RedirectUri { get; set; }
-        public string ClientId { get; set; }
+        public Client Client { get; set; }
 
         public bool ShowView => ViewModel != null;
         public ConsentViewModel ViewModel { get; set; }

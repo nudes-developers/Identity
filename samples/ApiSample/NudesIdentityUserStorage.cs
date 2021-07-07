@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using IdentityServer4.Models;
+using Microsoft.EntityFrameworkCore;
 using Nudes.Identity.Features.Users;
 using System;
 using System.Collections.Generic;
@@ -19,8 +20,8 @@ namespace ApiSample
             this.db = db;
         }
 
-        public Task<UserResult> AutoProvision(string provider, string providerUserId, IEnumerable<Claim> claims, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-        public Task<UserResult> ExternalProvider(string provider, string userId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<UserResult> AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<UserResult> FindByExternalProvider(string provider, string userId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public async Task GenerateResetPasswordTokenFor(string username, CancellationToken cancellationToken = default)
         {
             if (username == "bob")
@@ -51,7 +52,8 @@ namespace ApiSample
             }
         }
 
-        public Task<UserResult> ValidateUserCredentials(string username, string password, CancellationToken cancellationToken = default)
+
+        public Task<UserResult> ValidateUserCredentials(string username, string password, Client client, CancellationToken cancellationToken = default)
         {
             if (username == "bob" && password == bobPassword)
             {

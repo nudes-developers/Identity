@@ -17,8 +17,8 @@ namespace Nudes.Identity.AspnetCoreIdentity
             this.userManager = userManager;
         }
 
-        public Task<UserResult> AutoProvision(string provider, string providerUserId, IEnumerable<Claim> claims, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-        public Task<UserResult> ExternalProvider(string provider, string userId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<UserResult> AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task<UserResult> FindByExternalProvider(string provider, string userId, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public async Task<UserResult> ValidateUserCredentials(string username, string password, CancellationToken cancellationToken = default)
         {
             var user = await userManager.FindByNameAsync(username);
